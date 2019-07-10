@@ -1,0 +1,25 @@
+#content {
+    padding: auto;
+    text-align: center;
+    margin: auto;
+    width: 100%;
+}
+
+#content #title {
+    font-family: Besley Arial monospace;
+    font-weight: bolder;
+}
+#videoplayer-holder {
+    margin: auto;
+    position: relative;
+    padding-top: 56.25%;
+    width:91%;
+    height:84%;
+}
+#videoplayer {
+    position:absolute;
+    top:0;
+    left:0;
+    height: 100%;
+    width: 100%;
+}
