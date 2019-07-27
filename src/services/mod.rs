@@ -33,7 +33,7 @@ pub mod twitch_service {
     }
 
     #[derive(Serialize, Deserialize, Debug)]
-    struct Channel {
+    pub struct Channel {
         _id: i64,
         broadcaster_language: String,
         created_at: String,
@@ -45,17 +45,15 @@ pub mod twitch_service {
         mature: bool,
         name: String,
         partner: bool,
-        profile_banner: String,
         profile_banner_background_color: String,
         status: String,
         updated_at: String,
         url: String,
-        video_banner: String,
         views: i64,
     }
 
     #[derive(Serialize, Deserialize, Debug)]
-    struct Preview {
+    pub struct Preview {
         large: String,
         medium: String,
         small: String,
@@ -64,11 +62,11 @@ pub mod twitch_service {
 
     #[derive(Serialize, Deserialize, Debug)]
     pub struct StreamList {
-        streams: Vec<Streams>,
+        pub streams: Vec<Stream>,
     }
 
     #[derive(Serialize, Deserialize, Debug)]
-    struct Streams {
+    pub struct Stream {
         _id: i64,
         average_fps: i64,
         channel: Channel,
@@ -80,10 +78,15 @@ pub mod twitch_service {
         video_height: i64,
         viewers: i64,
     }
+    impl Stream {
+        pub fn get_channel_name(&self) -> String {
+            self.channel.name.clone()
+        }
+    }
 
     pub fn get_online_channels(channel_ids: &Vec<String>) -> Result<StreamList, Box<dyn Error>> {
-        let response = Client::new()
-            .get((BASE_URL.to_owned() + "/streams?channel=" + &channel_ids.join(",")).as_str())
+        let response : StreamList = Client::new()
+            .get((BASE_URL.to_owned() + "streams/?channel=" + &channel_ids.join(",")).as_str())
             .header("Client-ID", get_client_id_header_value() )
             .header( reqwest::header::ACCEPT, "application/vnd.twitchtv.v5+json")
             .send()?
@@ -93,7 +96,7 @@ pub mod twitch_service {
 
     pub fn get_info_from_usernames(usernames: Vec<String>) -> Result<TwitchUserList, Box<dyn Error>> {
         let response: TwitchUserList = Client::new()
-            .get((BASE_URL.to_owned() + "/users?login=" + &usernames.join(",").as_str()).as_str())
+            .get((BASE_URL.to_owned() + "users?login=" + &usernames.join(",").as_str()).as_str())
             .header("Client-ID", get_client_id_header_value() )
             .header( reqwest::header::ACCEPT, "application/vnd.twitchtv.v5+json")
             .send()?

@@ -7,13 +7,17 @@ use actix_web::*;
 use std::{
     thread,
     time::Duration,
-    sync::mpsc
+    vec::Vec,
+    sync::Mutex
 };
 use serde::Deserialize;
 use serde_json;
 
 use crate::controllers::pages_controller::*;
 use crate::services::twitch_service::*;
+use std::borrow::BorrowMut;
+use std::sync::MutexGuard;
+use std::ops::DerefMut;
 
 const STREAMERS_JSON : &'static str = include_str!("../streamers.json");
 
@@ -23,36 +27,46 @@ struct Streamers {
     twitch: Vec<String>
 }
 
+
 fn main() -> std::io::Result<()> {
     dotenv::dotenv().expect("Failed to read .env file");
     let streamers_list : Streamers = serde_json::from_str(STREAMERS_JSON)?;
     let twitch_streamers_id_list = get_info_from_usernames(streamers_list.twitch)
         .expect("Could not get twitch streamers id's").get_ids();
+    dbg!(&twitch_streamers_id_list);
+    let twitch_streamers_list = web::Data::new(Mutex::new(
+        StreamList {
+            streams: Vec::new()
+        }
+    ));
 
-    let (tx, rx) = mpsc::channel();
-
+    let i = twitch_streamers_list.clone();
     thread::spawn(move || {
         loop {
             println!("Fetching info");
 
-            get_online_channels(&twitch_streamers_id_list)
-            .map(|i| dbg!(i));
-
+            let updated_streamer_list = get_online_channels(&twitch_streamers_id_list)
+            .expect("could not fetch value");
+            *(&mut i
+                .lock()
+                .expect("could not lock mutex")).deref_mut() = updated_streamer_list;
+            // Sleep one minute.
             thread::sleep(Duration::from_millis(60000));
         }
     });
 
-    HttpServer::new(|| App::new()
-            .service(
-                web::resource("/",).to(index)
-            )
-            .service(
-                web::resource("/streamers",).to(streamers)
-            )
-            .service(
-                fs::Files::new("/resources", "../")
-                    .show_files_listing()
-            )
+    HttpServer::new(move || App::new()
+        .register_data(twitch_streamers_list.clone())
+        .service(
+            web::resource("/",).to(index)
+        )
+        .service(
+            web::resource("/streamers",).to(streamers)
+        )
+        .service(
+            fs::Files::new("/resources", "./resources")
+                .show_files_listing()
+        )
     )
         .bind("localhost:8080")?
         .run()

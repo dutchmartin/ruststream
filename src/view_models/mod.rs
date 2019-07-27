@@ -3,7 +3,15 @@ use askama::Template;
 #[derive(Template)]
 #[template(path = "home.html")]
 pub struct StreamViewModel<'a> {
-   pub title: &'a str
+   pub title: &'a str,
+   pub live_streamer: Livestreamer<'a>
+
+}
+
+pub enum Livestreamer<'a> {
+   Twitch(&'a str),
+   Youtube(&'a str),
+   None
 }
 
 #[derive(Template)]
