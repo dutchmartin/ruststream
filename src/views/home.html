@@ -10,13 +10,24 @@
 <div id="content">
     <h1 id="title">{{ title }}</h1>
     <div id="videoplayer-holder">
-        <iframe
-                id="videoplayer"
-                src="https://player.twitch.tv/?channel=kitboga"
-                scrolling="no"
-                frameborder="0"
-                allowfullscreen="allowfullscreen">
-        </iframe>
+        {% match live_streamer %}
+            {% when Livestreamer::Twitch with (username) %}
+                <iframe
+                        id="videoplayer"
+                        src="https://player.twitch.tv/?channel={{ username }}"
+                        scrolling="no"
+                        frameborder="0"
+                        allowfullscreen="allowfullscreen">
+                </iframe>
+            {% when Livestreamer::Youtube with (username) %}
+                <iframe src="https://www.youtube.com/embed/{{ username }}"
+                        frameborder="0"
+                        allowfullscreen>
+                </iframe>
+            {% when Livestreamer::None %}
+                <br>
+                <p>To make this go away, go stream rust programming!</p>
+        {% endmatch %}
     </div>
 </div>
 {% endblock %}

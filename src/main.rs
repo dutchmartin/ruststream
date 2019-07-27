@@ -33,7 +33,7 @@ fn main() -> std::io::Result<()> {
     let streamers_list : Streamers = serde_json::from_str(STREAMERS_JSON)?;
     let twitch_streamers_id_list = get_info_from_usernames(streamers_list.twitch)
         .expect("Could not get twitch streamers id's").get_ids();
-    dbg!(&twitch_streamers_id_list);
+
     let twitch_streamers_list = web::Data::new(Mutex::new(
         StreamList {
             streams: Vec::new()
