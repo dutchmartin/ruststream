@@ -10,4 +10,4 @@ COPY ./ ./
 # Build the app ready for production use.
 RUN $HOME/.cargo/bin/cargo build --release
 
-ENTRYPOINT ["cargo run"]
+ENTRYPOINT ["$HOME/.cargo/bin/cargo run --release"]
