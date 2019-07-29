@@ -8,16 +8,15 @@ use std::{
     thread,
     time::Duration,
     vec::Vec,
-    sync::Mutex
+    ops::DerefMut,
+    sync::Mutex,
+    env::var
 };
 use serde::Deserialize;
 use serde_json;
 
 use crate::controllers::pages_controller::*;
 use crate::services::twitch_service::*;
-use std::borrow::BorrowMut;
-use std::sync::MutexGuard;
-use std::ops::DerefMut;
 
 const STREAMERS_JSON : &'static str = include_str!("../streamers.json");
 
@@ -29,7 +28,7 @@ struct Streamers {
 
 
 fn main() -> std::io::Result<()> {
-    dotenv::dotenv().expect("Failed to read .env file");
+    dotenv::dotenv();
     let streamers_list : Streamers = serde_json::from_str(STREAMERS_JSON)?;
     let twitch_streamers_id_list = get_info_from_usernames(streamers_list.twitch)
         .expect("Could not get twitch streamers id's").get_ids();
@@ -68,6 +67,6 @@ fn main() -> std::io::Result<()> {
                 .show_files_listing()
         )
     )
-        .bind("localhost:8080")?
+        .bind(var("Address").unwrap())?
         .run()
 }
