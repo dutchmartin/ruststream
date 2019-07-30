@@ -67,6 +67,6 @@ fn main() -> std::io::Result<()> {
                 .show_files_listing()
         )
     )
-        .bind("localhost:" + var("PORT").unwrap())?
+        .bind(("localhost:".to_string() + &var("PORT").unwrap().to_string()).as_str())?
         .run()
 }
