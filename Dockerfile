@@ -5,9 +5,14 @@ FROM ubuntu:18.04
 RUN apt-get update; apt-get install gcc openssl libssl-dev pkg-config curl -y
 RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
-COPY ./ ./
+ENV PATH $PATH:/root/.cargo/bin
+
+ADD ./ ./
 
 # Build the app ready for production use.
-RUN $HOME/.cargo/bin/cargo build --release
+RUN cargo build --release
+EXPOSE 80/tcp
+EXPOSE 80/udp
 
-ENTRYPOINT ["$HOME/.cargo/bin/cargo run --release"]
+CMD ["/bin/bash"]
+ENTRYPOINT cargo run --release
